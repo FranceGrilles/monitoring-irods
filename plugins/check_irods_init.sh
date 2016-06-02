@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 # Description:
-#   Nagios probe to check the connection to an iRODS iCat server
+#   Nagios probe to check an iRODS environment
 #
 # Changelog:
 # * Sat May 09 2015 Emmanuel Medernach <emmanuel.medernach@iphc.cnrs.fr> 1.0-1
@@ -33,11 +33,15 @@ PWARNING=$1
 PCRITICAL=$2
 
 
-number_of_connection() {
-    ips | grep -v '^Server:' | wc -l
+check_init() {
+# iinit must be done before invoking tests.
+    [ -d ~/.irods ] || ( echo Directory ~/.irods does not exist; exit $STATE_CRITICAL )
+    [ -f ~/.irods/.irodsEnv ] || ( echo File ~/.irods/.irodsEnv does not exist; return $STATE_CRITICAL )
+    [ -f ~/.irods/.irodsA ] || ( echo File ~/.irods/.irodsA does not exist; return $STATE_CRITICAL ) 
+    echo All init files present
 }
 
-number_of_connection
+check_init
 exit $STATE_OK
 
 #EOF

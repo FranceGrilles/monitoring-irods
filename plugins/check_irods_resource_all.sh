@@ -32,6 +32,10 @@ STATE_DEPENDENT=4
 RETURN_MESSAGE="Ok"
 RETURN_CODE=0
 
+DIRNAME="$( cd "$(dirname "$0")" ; pwd -P )"
+TMPFILE=/tmp/irods-tmp
+NAGIOSCMD=/var/spool/nagios/cmd/nagios.cmd
+
 # Parse the arguments                                                           
 while [ -n "$1" ]; do
     case "$1" in
@@ -80,15 +84,16 @@ then
     exit $STATE_WARNING
 fi
 
-echo "HOST: $HOST; RESOURCE: $RESOURCE" >> /tmp/nag.log
-echo "HOME: $HOME" >> /tmp/nag.log
-echo "whoami: `whoami`" >> /tmp/nag.log
+echo "HOST: $HOST; RESOURCE: $RESOURCE" >> $TMPFILE
+echo "HOME: $HOME" >> $TMPFILE
+echo "whoami: `whoami`" >> $TMPFILE
+
 #
 # iput test
 #
 
 DATE=`date +%s`
-IPUT_PLUGIN_OUTPUT=`/usr/local/bin/check_irods_iput.sh -R $RESOURCE`
+IPUT_PLUGIN_OUTPUT=`$DIRNAME/check_irods_resource_iput.sh -R $RESOURCE`
 IPUT_RETURN_CODE=$?
 
 if [ ${IPUT_RETURN_CODE} -gt ${RETURN_CODE} ]; then
@@ -96,7 +101,7 @@ if [ ${IPUT_RETURN_CODE} -gt ${RETURN_CODE} ]; then
   RETURN_MESSAGE="Metric failed"
 fi
 
-echo "[${DATE}] PROCESS_SERVICE_CHECK_RESULT;${HOST};org.irods.irods3.Resource-Iput;${IPUT_RETURN_CODE};${IPUT_PLUGIN_OUTPUT}" > /var/spool/nagios/cmd/nagios.cmd
+echo "[${DATE}] PROCESS_SERVICE_CHECK_RESULT;${HOST};org.irods.irods3.Resource-Iput;${IPUT_RETURN_CODE};${IPUT_PLUGIN_OUTPUT}" > $NAGIOSCMD
 
 
 #
@@ -105,7 +110,7 @@ echo "[${DATE}] PROCESS_SERVICE_CHECK_RESULT;${HOST};org.irods.irods3.Resource-I
 
 DATE=`date +%s`
 if [ ${IPUT_RETURN_CODE} -eq 0 ]; then
-  IGET_PLUGIN_OUTPUT=`/usr/local/bin/check_irods_iget.sh -R $RESOURCE`
+  IGET_PLUGIN_OUTPUT=`$DIRNAME/check_irods_resource_iget.sh -R $RESOURCE`
   IGET_RETURN_CODE=$?
 else
   IGET_PLUGIN_OUTPUT="WARNING: Masked by iRODS-iput - ${IPUT_PLUGIN_OUTPUT}"
@@ -117,7 +122,7 @@ if [ ${IGET_RETURN_CODE} -gt ${RETURN_CODE} ]; then
   RETURN_MESSAGE="Metric failed"
 fi
 
-echo "[${DATE}] PROCESS_SERVICE_CHECK_RESULT;${HOST};org.irods.irods3.Resource-Iget;${IGET_RETURN_CODE};${IGET_PLUGIN_OUTPUT}" > /var/spool/nagios/cmd/nagios.cmd
+echo "[${DATE}] PROCESS_SERVICE_CHECK_RESULT;${HOST};org.irods.irods3.Resource-Iget;${IGET_RETURN_CODE};${IGET_PLUGIN_OUTPUT}" > $NAGIOSCMD
 
 #
 # irm test
@@ -126,7 +131,7 @@ echo "[${DATE}] PROCESS_SERVICE_CHECK_RESULT;${HOST};org.irods.irods3.Resource-I
 DATE=`date +%s`
 
 if [ ${IPUT_RETURN_CODE} -eq 0 ]; then
-  IRM_PLUGIN_OUTPUT=`/usr/local/bin/check_irods_irm.sh -R $RESOURCE`
+  IRM_PLUGIN_OUTPUT=`$DIRNAME/check_irods_resource_irm.sh -R $RESOURCE`
   IRM_RETURN_CODE=$?
 else
   IRM_PLUGIN_OUTPUT="WARNING: Masked by iRODS-iput - ${IPUT_PLUGIN_OUTPUT}"
@@ -138,10 +143,12 @@ if [ ${IRM_RETURN_CODE} -gt ${RETURN_CODE} ]; then
   RETURN_MESSAGE="Metric failed"
 fi
 
-echo "[${DATE}] PROCESS_SERVICE_CHECK_RESULT;${HOST};org.irods.irods3.Resource-Irm;${IRM_RETURN_CODE};${IRM_PLUGIN_OUTPUT}" > /var/spool/nagios/cmd/nagios.cmd 
+echo "[${DATE}] PROCESS_SERVICE_CHECK_RESULT;${HOST};org.irods.irods3.Resource-Irm;${IRM_RETURN_CODE};${IRM_PLUGIN_OUTPUT}" > $NAGIOSCMD
 
 #
 # Global status
 #
 echo ${RETURN_MESSAGE}
 exit ${RETURN_CODE}
+
+#EOF
