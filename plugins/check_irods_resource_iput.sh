@@ -1,57 +1,59 @@
 #!/bin/bash
-
-# Copyright (C) 2015 CNRS
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Copyright 2015-2019 CNRS and University of Strasbourg
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Description:
-#  Nagios Probe to check if a file can be copied to an iRODS resource
-#
-# Changelog:
-# * Sat May 09 2015 Emmanuel Medernach <emmanuel.medernach@iphc.cnrs.fr> 1.0-1 
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
 
-HELP="This script is used by Nagios to copy a file to an iRODS resource."
+USAGE="[-h] [-v] [ -d DIRECTORY ] -r RESOURCE -f FILENAME"
+DESCRIPTION="A Nagios probe that check the copy of a file to an iRODS resource"
 
 # Initialisation                                                                
-NVERSION=0.1
+NVERSION=1.0
 STATE_OK=0
 STATE_WARNING=1
 STATE_CRITICAL=2
 STATE_UNKNOWN=3
-STATE_DEPENDENT=4
 
 PROGNAME=`basename $0`
 PWARNING=$1
 PCRITICAL=$2
 
-DIR=/tmp
-
 print_usage() {
-    echo "Usage: $PROGNAME --help"
-    echo "Usage: $PROGNAME --version"
+    echo "usage: ${PROGNAME} ${USAGE}"
 }
 
 print_help() {
-    echo "Command : $PROGNAME"
-    echo $HELP
-    echo
-    echo "Usage: $PROGNAME [-R <resource>] -d <destination>"
+    echo "usage: ${PROGNAME} ${USAGE}"
+    echo ""
+    echo "${DESCRIPTION}"
+    echo ""
+    echo "optional arguments:"
+    echo "  -h, --help            show this help message and exit"
+    echo "  -v, --version         show program's version number and exit"
+    echo "  -r                    RESOURCE"
+    echo "                        the irods resource to copy the file to"
+    echo "  -d                    DIRECTORY"
+    echo "                        the DIRECTORY on the iRODS server to copy the file to"
+    echo "  -f                    FILENAME"
+    echo "                        the name of the file to copy"
 }
 
 put_file() {
-    FILE="$DIR/DATE.$RESOURCE"
-    [ -f $FILE ] || ( date > $FILE )
-    iput -R $RESOURCE -f $FILE $DESTINATION 2>&1 || exit $STATE_CRITICAL
+    OUTPUT=`iput -R ${RESOURCE} ${FILENAME} ${DIRECTORY} 2>&1`
+    if [ $? -gt 0 ]; then
+        echo "The ${FILENAME} file cannot be copied to the ${RESOURCE} iRODS resource"
+        exit $STATE_CRITICAL
+    fi
 }
 
 DESTINATION=""
@@ -62,45 +64,57 @@ while [ -n "$1" ]; do
     case "$1" in
         --help)
             print_help
-            exit $STATE_OK
+            exit ${STATE_OK}
             ;;
         -h)
             print_help
-            exit $STATE_OK
+            exit ${STATE_OK}
             ;;
         --version)
-            echo "Version: $NVERSION"
-            exit $STATE_OK
+            echo "${NVERSION}"
+            exit ${STATE_OK}
             ;;
-        -V)
-            echo "Version: $NVERSION"
-            exit $STATE_OK
+        -v)
+            echo "${NVERSION}"
+            exit ${STATE_OK}
             ;;
-        -R)
+        -r)
             RESOURCE=$2
             shift
             ;;
         -d)
-            DESTINATION=$2
+            DIRECTORY=$2
+            shift
+            ;;
+        -f)
+            FILENAME=$2
             shift
             ;;
         *)
-            echo "Unknown argument: $1"
             print_usage
-            exit $STATE_UNKNOWN
+            exit ${STATE_UNKNOWN}
             ;;
     esac
     shift
 done
 
-if [ -z $RESOURCE ]
-then
-    echo "Resource option not set: -R <resource>"
-    exit $STATE_WARNING
+if [ -z ${RESOURCE} ]; then
+    echo "The resource option is not set"
+    exit ${STATE_UNKNOWN}
+fi
+
+if [ -z ${FILENAME} ]; then
+    echo "The filename option is not set"
+    exit ${STATE_UNKNOWN}
+fi
+
+if [ ! -f ${FILENAME} ]; then
+   echo "The ${FILENAME} file does not exist"
+   exit ${STATE_UNKNOWN}
 fi
 
 put_file
-echo Ok
-exit $STATE_OK
 
-#EOF
+echo "The \`${FILENAME}\` file has been successfully copied to the \`${RESOURCE}\` iRODS resource"
+exit ${STATE_OK}
+
