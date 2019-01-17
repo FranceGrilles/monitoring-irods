@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-USAGE="[-h] [-v] [ -d DIRECTORY ] -r RESOURCE -f FILENAME"
+USAGE="[-h] [-v] [ -d DIRECTORY ] -r RESOURCE -H HOST"
 DESCRIPTION="A Nagios probe that check if an iRODS resource is correctly working"
 
 # Initialisation
