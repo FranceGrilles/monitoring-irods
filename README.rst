@@ -5,7 +5,7 @@ iRODS Monitoring Probes
 This project aims to provide a set of probes for monitoring an
 `iRODS <https://irods.org/>`_ infrastructure. These probes are designed for
 being used with Nagios, but are also compatible with other monitoring solutions
-like `Shinken <http://www.shinken-monitoring.org>_` or
+like `Shinken <http://www.shinken-monitoring.org>`_ or
 `Icinga <https://icinga.com>`_.
 
 
