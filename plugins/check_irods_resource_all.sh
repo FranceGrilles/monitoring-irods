@@ -101,7 +101,7 @@ if [ -z ${HOST} ]; then
     exit ${STATE_UNKNOWN}
 fi
 
-IRODS_FILENAME="${TMPFILE}_${RESOURCE}.json"
+IRODS_FILENAME="iRODS_probe_${RESOURCE}.json"
 LOCAL_FILENAME="/tmp/${IRODS_FILENAME}"
 
 CONTENT=$(cat <<EOF
