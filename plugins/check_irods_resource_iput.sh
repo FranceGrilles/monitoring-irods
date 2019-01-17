@@ -49,6 +49,13 @@ print_help() {
 }
 
 put_file() {
+    # Check if the file exists
+    OUTPUT=`ils ${FILE} 2>&1`
+    if [ $? -eq 0 ]; then
+        echo "The ${FILE} file already exist"
+        exit ${STATE_CRITICAL}
+    fi
+
     OUTPUT=`iput -R ${RESOURCE} ${FILENAME} ${DIRECTORY} 2>&1`
     if [ $? -gt 0 ]; then
         echo "The ${FILENAME} file cannot be copied to the ${RESOURCE} iRODS resource"

@@ -56,6 +56,13 @@ get_file() {
         FILE="${FILENAME}"
     fi
 
+    # Check if the file exists
+    OUTPUT=`ils ${FILE} 2>&1`
+    if [ $? -gt 0 ]; then
+        echo "The ${FILE} file does not exist"
+        exit ${STATE_CRITICAL}
+    fi
+
     OUTPUT=`iget -R ${RESOURCE} -f ${FILE} ${FILENAME}.iget 2>&1`
     if [ $? -gt 0 ]; then
         echo "The ${FILE} file cannot be retrieved from the ${RESOURCE} iRODS resource"
