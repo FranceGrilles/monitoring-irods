@@ -169,12 +169,12 @@ else
 fi
 
 if [ ${IRM_RETURN_CODE} -gt ${RETURN_CODE} ]; then
-    RETURN_CODE=${IRM_RETURN_CODE}
     if [ ${RETURN_CODE} -gt ${STATE_OK} ]; then
         RETURN_MESSAGE="${RETURN_MESSAGE}; ERROR: irm metric failed"
     else
         RETURN_MESSAGE="ERROR: irm metric failed"
     fi
+    RETURN_CODE=${IRM_RETURN_CODE}
 fi
 
 echo "[${DATE}] PROCESS_SERVICE_CHECK_RESULT;${HOST};org.irods.irods4.Resource-Irm;${IRM_RETURN_CODE};${IRM_PLUGIN_OUTPUT}" > $NAGIOSCMD
