@@ -49,6 +49,12 @@ print_help() {
 }
 
 put_file() {
+    if [ -z ${DIRECTORY} ]; then
+        FILE="${FILENAME}"
+    else
+        FILE="${DIRECTORY}/${FILENAME}"
+    fi
+
     # Check if the file exists
     OUTPUT=`ils ${FILE} 2>&1`
     if [ $? -eq 0 ]; then

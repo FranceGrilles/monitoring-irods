@@ -63,7 +63,8 @@ delete_file() {
     fi
 
     # Check that it exists on the requested resource
-    OUTPUT=`ils -l ${FILE} 2>&1 | head -1 | awk '{ print $3}' | cut -d';' -f1`
+    # The uniq command is used to filtrate the replicates
+    OUTPUT=`ils -l ${FILE} 2>&1 | awk '{ print $3}' | cut -d';' -f1 | uniq`
     if [ "x${OUTPUT}" != "x${RESOURCE}" ]; then
         echo "The ${FILE} file does not exist on the requested resource"
         exit ${STATE_CRITICAL}
